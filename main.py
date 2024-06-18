@@ -55,11 +55,22 @@ Topusers= pd.DataFrame(t6,columns=['States','Year','Quater','Pincode','Registere
 
 
 def averageTrans(Amount,q21):
+        db=mysql.connector.connect(
+        host='localhost',
+        user='root',
+        password='root',
+        database='phonepe'
+
+        )
+        mycursor= db.cursor()
+
+
         
-        mf=Aggtrans[Aggtrans['Year']==Amount]
-        mf.reset_index(drop=True,inplace=True)
-        mf1=mf[mf['Quater']==q21]
-        mf1.reset_index(inplace=True)
+        query1 = f'''SELECT * FROM phonepe.aggtrans where Year='{Amount}' and Quater='{q21}';'''
+        mycursor.execute(query1)
+        t1=mycursor.fetchall()
+        mf1= pd.DataFrame(t1,columns=['States','Year','Quater','TransactionType','TransactionCount','TransactionAmount'])
+        
         mfs1=mf1.groupby('States')[['TransactionCount','TransactionAmount']].sum()
         mfs1.reset_index(inplace=True)
         col1,col2=st.columns(2)
@@ -100,11 +111,22 @@ def averageTrans(Amount,q21):
 
         figindia1.update_geos(visible=False)
         st.plotly_chart(figindia1, use_container_width=True)
-
-
 def avgtrans(amount1):
-        mf=Aggtrans[Aggtrans['Year']==amount1]
-        mf.reset_index(drop=True,inplace=True)
+        db=mysql.connector.connect(
+        host='localhost',
+        user='root',
+        password='root',
+        database='phonepe'
+
+        )
+        mycursor= db.cursor()
+
+
+        
+        query1 = f'''SELECT * FROM phonepe.aggtrans where Year='{amount1}';'''
+        mycursor.execute(query1)
+        t1=mycursor.fetchall()
+        mf= pd.DataFrame(t1,columns=['States','Year','Quater','TransactionType','TransactionCount','TransactionAmount'])
         mfs1=mf.groupby('States')[['TransactionCount','TransactionAmount']].sum()
         mfs1.reset_index(inplace=True)
        
@@ -141,34 +163,94 @@ def avgtrans(amount1):
         st.plotly_chart(figindia31, use_container_width=True)
 
 
+def usersreg(amount1):
+        db=mysql.connector.connect(
+        host='localhost',
+        user='root',
+        password='root',
+        database='phonepe'
+
+        )
+        mycursor= db.cursor()
+
+
+
+        query4 = f'''SELECT * FROM phonepe.mapusers where Year ='{amount1}';'''
+        mycursor.execute(query4)
+        t4=mycursor.fetchall()
+        mqf= pd.DataFrame(t4,columns=['States','Year','Quater','Districts','UsersRegister','UsersAppopens'])
+
+        mqfs1=mqf.groupby('States')[['UsersRegister']].sum()
+        mqfs1.reset_index(inplace=True)
+       
+
+
+        url='https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson'
+
+        response= requests.get(url)
+        data1=json.loads(response.content)
+        states_name=[]
+        for feature in data1['features']:
+            states_name.append(feature['properties']['ST_NM'])
+
+        states_name.sort()
+        
+
+        figindia51= px.choropleth(mqfs1,geojson=data1,locations='States',featureidkey='properties.ST_NM',
+                                color='UsersRegister',color_continuous_scale='ylorrd',
+                                range_color=(mqfs1['UsersRegister'].min(),mqfs1['UsersRegister'].max()),
+                                hover_name='States',title=f'{amount1} UsersRegister',fitbounds='locations',
+                                height=800,width=100)
+        figindia51.update_geos(visible=False)
+        st.plotly_chart(figindia51, use_container_width=True)     
+
+
+
+
+
+
 def mtrans(mAmount,ma19,state):
-        mf=Maptrans[Maptrans['Year']==mAmount]
-        mf.reset_index(drop=True,inplace=True)
-        mw=mf[mf['Quater']==ma19]
-        mw.reset_index(drop=True,inplace=True)
-        ms=mw[mw['States']==state]
-        ms.reset_index(drop=True,inplace=True)
-        cm1,cm2=st.columns(2)
-        with cm1:
-              fig1=px.bar(ms,x='Districts',y='TransAmount',title=f'{mAmount} Quater{ma19} {state} Transanction Amount')
-              st.plotly_chart(fig1, use_container_width=True)
-        with  cm2:
-             fig2=px.bar(ms,x='Districts',y='TransCount',title=f'{mAmount} Quater{ma19} {state} Transanction Count')
-             st.plotly_chart(fig2, use_container_width=True)
+      db=mysql.connector.connect(
+      host='localhost',
+      user='root',
+      password='root',
+      database='phonepe'
+
+      )
+      mycursor= db.cursor()
+
+
+
+      query3 = f'''SELECT * FROM phonepe.maptrans where Year='{mAmount}' and Quater='{ma19}' and State='{state}';'''
+      mycursor.execute(query3)
+      t3=mycursor.fetchall()
+      ms= pd.DataFrame(t3,columns=['States','Year','Quater','Districts','TransCount','TransAmount'])
+      cm1,cm2=st.columns(2)
+      with cm1:
+            fig1=px.bar(ms,x='Districts',y='TransAmount',title=f'{mAmount} Quater{ma19} {state} Transanction Amount')
+            st.plotly_chart(fig1, use_container_width=True)
+      with  cm2:
+            fig2=px.bar(ms,x='Districts',y='TransCount',title=f'{mAmount} Quater{ma19} {state} Transanction Count')
+            st.plotly_chart(fig2, use_container_width=True)
                   
         
 
-       
-
-        
-
-
-
 def mtrans1(mAmount,state):
-        mf=Maptrans[Maptrans['Year']==mAmount]
-        mf.reset_index(drop=True,inplace=True)
-        ms=mf[mf['States']==state]
-        ms.reset_index(drop=True,inplace=True)
+        db=mysql.connector.connect(
+        host='localhost',
+        user='root',
+        password='root',
+        database='phonepe'
+
+        )
+        mycursor= db.cursor()
+
+
+
+        query3 = f'''SELECT * FROM phonepe.maptrans where Year='{mAmount}' and  State='{state}';'''
+        mycursor.execute(query3)
+        t3=mycursor.fetchall()
+        ms= pd.DataFrame(t3,columns=['States','Year','Quater','Districts','TransCount','TransAmount'])
         my=ms.groupby('Districts')[['TransCount','TransAmount']].sum()
         my.reset_index(inplace=True)
         cn1,cn2=st.columns(2)
@@ -177,16 +259,29 @@ def mtrans1(mAmount,state):
                 st.plotly_chart(fig1, use_container_width=True)
         with cn2:
              fig2=px.bar(my,x='Districts',y='TransCount',title=f'{mAmount} {state} Transanction Count')
-             st.plotly_chart(fig2, use_container_width=True)
+             st.plotly_chart(fig2, use_container_width=True)       
+
+        
+
+
+
+
              
 
         
 def ttrans(tAmount,State):
+        db=mysql.connector.connect(
+        host='localhost',
+        user='root',
+        password='root',
+        database='phonepe'
 
-        mt=Toptrans[Toptrans['Year']==tAmount]
-        mt.reset_index(drop=True,inplace=True)
-        mts=mt[mt['States']==state]
-        mts.reset_index(drop=True,inplace=True)
+        )
+        mycursor= db.cursor()
+        query5 = f'''SELECT * FROM phonepe.toptrans where Year='{tAmount}' and State= '{State}';'''
+        mycursor.execute(query5)
+        t5=mycursor.fetchall()
+        mts= pd.DataFrame(t5,columns=['States','Year','Quater','Pincode','TransCount','TransAmount'])
 
 
         fig1=px.bar(mts,x='Quater',y='TransAmount',hover_data='Pincode',title=f'{tAmount} {state} Transanction Amount')
@@ -198,26 +293,38 @@ def ttrans(tAmount,State):
 
 
 def usersy(UAmount,ustate):
+    db=mysql.connector.connect(
+    host='localhost',
+    user='root',
+    password='root',
+    database='phonepe'
 
-    muf=Aggusers[Aggusers['Year']==UAmount]
-    muf.reset_index(drop=True,inplace=True)
-    muts=muf[muf['States']==ustate]
-    muts.reset_index(drop=True,inplace=True)
+    )
+    mycursor= db.cursor()
+    query2 = f'''SELECT * FROM phonepe.aggusers where Year='{UAmount}' and State='{ustate}';'''
+    mycursor.execute(query2)
+    t2=mycursor.fetchall()
+    muts= pd.DataFrame(t2,columns=['States','Year','Quater','UsersBrand','UsersCount','UsersPercentage'])
     mufs=muts.groupby('UsersBrand')[['UsersCount']].sum()
     mufs.reset_index(inplace=True)
     fig15=px.bar(mufs,x='UsersBrand',y='UsersCount',title=f'{UAmount} {ustate} Users Count')
     st.plotly_chart(fig15, use_container_width=True)
     
 
-
 def usersq(UAmount,ustate,qu):
+    db=mysql.connector.connect(
+    host='localhost',
+    user='root',
+    password='root',
+    database='phonepe'
 
-    muf=Aggusers[Aggusers['Year']==UAmount]
-    muf.reset_index(drop=True,inplace=True)
-    muf=Aggusers[Aggusers['Quater']==qu]
-    muf.reset_index(drop=True,inplace=True)
-    muts=muf[muf['States']==ustate]
-    muts.reset_index(drop=True,inplace=True)
+    )
+    mycursor= db.cursor()
+    query2 = f'''SELECT * FROM phonepe.aggusers where Year='{UAmount}'and Quater='{qu}' and State='{ustate}';'''
+    mycursor.execute(query2)
+    t2=mycursor.fetchall()
+    muts= pd.DataFrame(t2,columns=['States','Year','Quater','UsersBrand','UsersCount','UsersPercentage'])
+
     mufs=muts.groupby('UsersBrand')[['UsersCount']].sum()
     mufs.reset_index(inplace=True)
     fig14=px.bar(mufs,x='UsersBrand',y='UsersCount',title=f'{UAmount} Quater{qu} {ustate} Users Count')
@@ -225,14 +332,22 @@ def usersq(UAmount,ustate,qu):
 
 
 
-def userd (mamount,maw,wstate):
 
-    mufwq=Mapusers[Mapusers['Year']==mamount]
-    mufwq.reset_index(drop=True,inplace=True)
-    mufw=mufwq[mufwq['Quater']==maw]
-    mufw.reset_index(drop=True,inplace=True)
-    mutsw=mufw[mufw['States']==wstate]
-    mutsw.reset_index(drop=True,inplace=True)
+def userd (mamount,maw,wstate):
+    db=mysql.connector.connect(
+    host='localhost',
+    user='root',
+    password='root',
+    database='phonepe'
+
+    )
+    mycursor= db.cursor()
+    query4 = f'''SELECT * FROM phonepe.mapusers where Year='{mamount}' and Quater='{maw}' and State='{wstate}';'''
+    mycursor.execute(query4)
+    t4=mycursor.fetchall()
+    mutsw= pd.DataFrame(t4,columns=['States','Year','Quater','Districts','UsersRegister','UsersAppopens'])
+
+
     fig17=px.bar(mutsw,x='Districts',y='UsersRegister',title=f'{mamount} Quater{maw} {wstate} Users Count')
     st.plotly_chart(fig17, use_container_width=True)
 
@@ -241,11 +356,21 @@ def userd (mamount,maw,wstate):
 
 
 def usersdy (mamount,wstate):
+    db=mysql.connector.connect(
+    host='localhost',
+    user='root',
+    password='root',
+    database='phonepe'
 
-    quf=Mapusers[Mapusers['Year']==mamount]
-    quf.reset_index(drop=True,inplace=True)
-    mutsq=quf[quf['States']==wstate]
-    mutsq.reset_index(drop=True,inplace=True)
+    )
+    mycursor= db.cursor()
+
+    query4 = f'''SELECT * FROM phonepe.mapusers where Year='{mamount}' and State='{wstate}';'''
+    mycursor.execute(query4)
+    t4=mycursor.fetchall()
+    mutsq= pd.DataFrame(t4,columns=['States','Year','Quater','Districts','UsersRegister','UsersAppopens'])
+
+
     mufsq=mutsq.groupby('Districts')[['UsersRegister','UsersAppopens']].sum()
     mufsq.reset_index(inplace=True)
     fig16=px.bar(mufsq,x='Districts',y='UsersRegister',title=f'{mamount}  {wstate} Users Count')
@@ -260,11 +385,19 @@ def usersdy (mamount,wstate):
 
 
 def topr(uAmount,utstate):
+        db=mysql.connector.connect(
+        host='localhost',
+        user='root',
+        password='root',
+        database='phonepe'
 
-        mt=Topusers[Topusers['Year']==uAmount]
-        mt.reset_index(drop=True,inplace=True)
-        mts=mt[mt['States']==utstate]
-        mts.reset_index(drop=True,inplace=True)
+        )
+        mycursor= db.cursor()
+
+        query6 = f'''SELECT * FROM phonepe.topusers  where Year='{uAmount}' and State='{utstate}';'''
+        mycursor.execute(query6)
+        t6=mycursor.fetchall()
+        mts= pd.DataFrame(t6,columns=['States','Year','Quater','Pincode','RegisteredUsers'])
         fig19=px.bar(mts,x='Quater',y='RegisteredUsers',title=f'{uAmount}  {utstate} Users Count',hover_data='Pincode')
         st.plotly_chart(fig19, use_container_width=True)
 
@@ -289,6 +422,7 @@ if select=="Home":
         amount1=st.radio('select the year',[2018,2019,2020,2021,2022,2023],horizontal=True)
         if amount1==amount1:
                 tran=avgtrans(amount1)
+                uussera=usersreg(amount1)
 
                 
 
@@ -375,67 +509,175 @@ elif select=='DropDown Questions':
                                                 '9.what are the mobile brand used and its percentage in 2021?',
                                                 '10.what are the mobile brand used and its percentage in 2022?'))
         if  question =='1.what are the transaction count and transaction type in 2019?':
-                        muf=Aggtrans[Aggtrans['Year']==2019]
-                        muf.reset_index(drop=True,inplace=True)
+                        db=mysql.connector.connect(
+                        host='localhost',
+                        user='root',
+                        password='root',
+                        database='phonepe'
+
+                        )
+                        mycursor= db.cursor()
+                        query1 = '''SELECT * FROM phonepe.aggtrans where Year=2019;'''
+                        mycursor.execute(query1)
+                        t1=mycursor.fetchall()
+                        muf= pd.DataFrame(t1,columns=['States','Year','Quater','TransactionType','TransactionCount','TransactionAmount'])
                         mufs=muf.groupby('TransactionType')[['TransactionCount']].sum()
                         mufs.reset_index(inplace=True)
                         fig15=px.bar(mufs,x='TransactionType',y='TransactionCount',title=f'{2019} transaction type  Count')
                         st.plotly_chart(fig15, use_container_width=True)
         elif question =='2.what are the transaction amount and transaction type in 2019?':
-                        af=Aggtrans[Aggtrans['Year']==2019]
-                        af.reset_index(drop=True,inplace=True)
+                        db=mysql.connector.connect(
+                        host='localhost',
+                        user='root',
+                        password='root',
+                        database='phonepe'
+
+                        )
+                        mycursor= db.cursor()
+                        query1 = '''SELECT * FROM phonepe.aggtrans where Year=2019;'''
+                        mycursor.execute(query1)
+                        t1=mycursor.fetchall()
+                        af= pd.DataFrame(t1,columns=['States','Year','Quater','TransactionType','TransactionCount','TransactionAmount'])
+
                         afs=af.groupby('TransactionType')[['TransactionAmount']].sum()
                         afs.reset_index(inplace=True)
                         a2=px.bar(afs,x='TransactionType',y='TransactionAmount',title=f'{2019} transaction type  Amount')
                         st.plotly_chart(a2, use_container_width=True)  
         elif question == '3.what are the transaction count and transaction type in 2022?':
-                    muf=Aggtrans[Aggtrans['Year']==2022]
-                    muf.reset_index(drop=True,inplace=True)
-                    mufs=muf.groupby('TransactionType')[['TransactionCount']].sum()
-                    mufs.reset_index(inplace=True)
-                    fig15=px.bar(mufs,x='TransactionType',y='TransactionCount',title=f'{2022} transaction type  Count')
-                    st.plotly_chart(fig15, use_container_width=True)  
+                        db=mysql.connector.connect(
+                        host='localhost',
+                        user='root',
+                        password='root',
+                        database='phonepe'
+
+                        )
+                        mycursor= db.cursor()
+                        query1 = '''SELECT * FROM phonepe.aggtrans where Year=2022;'''
+                        mycursor.execute(query1)
+                        t1=mycursor.fetchall()
+                        muf= pd.DataFrame(t1,columns=['States','Year','Quater','TransactionType','TransactionCount','TransactionAmount'])
+
+                        mufs=muf.groupby('TransactionType')[['TransactionCount']].sum()
+                        mufs.reset_index(inplace=True)
+                        fig15=px.bar(mufs,x='TransactionType',y='TransactionCount',title=f'{2022} transaction type  Count')
+                        st.plotly_chart(fig15, use_container_width=True)  
+                    
         elif question =='4.what are the transaction amount and transaction type in 2022?':
-                        af=Aggtrans[Aggtrans['Year']==2022]
-                        af.reset_index(drop=True,inplace=True)
+                        db=mysql.connector.connect(
+                        host='localhost',
+                        user='root',
+                        password='root',
+                        database='phonepe'
+
+                        )
+                        mycursor= db.cursor()
+                        query1 = '''SELECT * FROM phonepe.aggtrans where Year=2022;'''
+                        mycursor.execute(query1)
+                        t1=mycursor.fetchall()
+                        af= pd.DataFrame(t1,columns=['States','Year','Quater','TransactionType','TransactionCount','TransactionAmount'])
                         afs=af.groupby('TransactionType')[['TransactionAmount']].sum()
                         afs.reset_index(inplace=True)
                         a2=px.bar(afs,x='TransactionType',y='TransactionAmount',title=f'{2022} transaction type  Amount')
                         st.plotly_chart(a2, use_container_width=True) 
         elif question =='5.what are the transaction count and transaction type in 2021?':
-                    muf=Aggtrans[Aggtrans['Year']==2021]
-                    muf.reset_index(drop=True,inplace=True)
-                    mufs=muf.groupby('TransactionType')[['TransactionCount']].sum()
-                    mufs.reset_index(inplace=True)
-                    fig15=px.bar(mufs,x='TransactionType',y='TransactionCount',title=f'{2021} transaction type  Count')
-                    st.plotly_chart(fig15, use_container_width=True)     
+                        db=mysql.connector.connect(
+                        host='localhost',
+                        user='root',
+                        password='root',
+                        database='phonepe'
+
+                        )
+                        mycursor= db.cursor()
+                        query1 = '''SELECT * FROM phonepe.aggtrans where Year=2021;'''
+                        mycursor.execute(query1)
+                        t1=mycursor.fetchall()
+                        muf= pd.DataFrame(t1,columns=['States','Year','Quater','TransactionType','TransactionCount','TransactionAmount'])
+                        mufs=muf.groupby('TransactionType')[['TransactionCount']].sum()
+                        mufs.reset_index(inplace=True)
+                        fig15=px.bar(mufs,x='TransactionType',y='TransactionCount',title=f'{2021} transaction type  Count')
+                        st.plotly_chart(fig15, use_container_width=True)     
         elif question =='6.what are the transaction amount and transaction type in 2021?':
-                        af=Aggtrans[Aggtrans['Year']==2021]
-                        af.reset_index(drop=True,inplace=True)
+                        db=mysql.connector.connect(
+                        host='localhost',
+                        user='root',
+                        password='root',
+                        database='phonepe'
+
+                        )
+                        mycursor= db.cursor()
+                        query1 = '''SELECT * FROM phonepe.aggtrans where Year=2021;'''
+                        mycursor.execute(query1)
+                        t1=mycursor.fetchall()
+                        af= pd.DataFrame(t1,columns=['States','Year','Quater','TransactionType','TransactionCount','TransactionAmount'])
+    
                         afs=af.groupby('TransactionType')[['TransactionAmount']].sum()
                         afs.reset_index(inplace=True)
                         a2=px.bar(afs,x='TransactionType',y='TransactionAmount',title=f'{2021} transaction type  Amount')
                         st.plotly_chart(a2, use_container_width=True) 
         elif question =='7.what are the transaction count and transaction type in 2020':
-                    muf=Aggtrans[Aggtrans['Year']==2020]
-                    muf.reset_index(drop=True,inplace=True)
-                    mufs=muf.groupby('TransactionType')[['TransactionCount']].sum()
-                    mufs.reset_index(inplace=True)
-                    fig15=px.bar(mufs,x='TransactionType',y='TransactionCount',title=f'{2020} transaction type  Count')
-                    st.plotly_chart(fig15, use_container_width=True)
+                        db=mysql.connector.connect(
+                        host='localhost',
+                        user='root',
+                        password='root',
+                        database='phonepe'
+
+                        )
+                        mycursor= db.cursor()
+                        query1 = '''SELECT * FROM phonepe.aggtrans where Year=2020;'''
+                        mycursor.execute(query1)
+                        t1=mycursor.fetchall()
+                        muf= pd.DataFrame(t1,columns=['States','Year','Quater','TransactionType','TransactionCount','TransactionAmount'])
+    
+                        mufs=muf.groupby('TransactionType')[['TransactionCount']].sum()
+                        mufs.reset_index(inplace=True)
+                        fig15=px.bar(mufs,x='TransactionType',y='TransactionCount',title=f'{2020} transaction type  Count')
+                        st.plotly_chart(fig15, use_container_width=True)
         elif question =='8.what are the transaction amount and transaction type in 2020?':
-                        af=Aggtrans[Aggtrans['Year']==2020]
-                        af.reset_index(drop=True,inplace=True)
+                        db=mysql.connector.connect(
+                        host='localhost',
+                        user='root',
+                        password='root',
+                        database='phonepe'
+
+                        )
+                        mycursor= db.cursor()
+                        query1 = '''SELECT * FROM phonepe.aggtrans where Year=2020;'''
+                        mycursor.execute(query1)
+                        t1=mycursor.fetchall()
+                        af= pd.DataFrame(t1,columns=['States','Year','Quater','TransactionType','TransactionCount','TransactionAmount'])
+                        
                         afs=af.groupby('TransactionType')[['TransactionAmount']].sum()
                         afs.reset_index(inplace=True)
                         a2=px.bar(afs,x='TransactionType',y='TransactionAmount',title=f'{2020} transaction type  Amount')
                         st.plotly_chart(a2, use_container_width=True) 
         elif question =='9.what are the mobile brand used and its percentage in 2021?':
-                    af10=Aggusers[Aggusers['Year']==2021]
-                    af10.reset_index(drop=True,inplace=True)
+                    db=mysql.connector.connect(
+                    host='localhost',
+                    user='root',
+                    password='root',
+                    database='phonepe'
+
+                    )
+                    mycursor= db.cursor()
+                    query2 = '''SELECT * FROM phonepe.aggusers;'''
+                    mycursor.execute(query2)
+                    t2=mycursor.fetchall()
+                    af10= pd.DataFrame(t2,columns=['States','Year','Quater','UsersBrand','UsersCount','UsersPercentage'])
                     a19=px.pie(af10,names='UsersBrand',values='UsersPercentage',title=f'{2021} brand percentage')
                     st.plotly_chart(a19, use_container_width=True)
         elif question =='10.what are the mobile brand used and its percentage in 2022?':
+                    db=mysql.connector.connect(
+                    host='localhost',
+                    user='root',
+                    password='root',
+                    database='phonepe'
+
+                    )
+                    mycursor= db.cursor()
+                    query2 = '''SELECT * FROM phonepe.aggusers where Year=2022;'''
+                    mycursor.execute(query2)
+                    t2=mycursor.fetchall()
+                    af10= pd.DataFrame(t2,columns=['States','Year','Quater','UsersBrand','UsersCount','UsersPercentage'])
                     af9=Aggusers[Aggusers['Year']==2022]
                     af9.reset_index(drop=True,inplace=True)
                     a9=px.pie(af9,names='UsersBrand',values='UsersPercentage',title=f'{2022} brand percentage')
